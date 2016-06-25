@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Bot.Connector;
+using Microsoft.Bot.Builder.Dialogs;
 
 namespace Tuzobot
 {
@@ -16,12 +17,9 @@ namespace Tuzobot
             if (message.Type == "Message")
             {
                 
-                if(message.Attachments.Count>0)
-                {
-                    foreach
-                }
 
-                return message.CreateReplyMessage($"You sent {length} characters");
+
+                return await Conversation.SendAsync(message, () => new MainDialog());
             }
             else
             {
