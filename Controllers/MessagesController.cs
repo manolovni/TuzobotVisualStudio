@@ -4,6 +4,9 @@ using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
 using System.Linq;
 using System;
+using System.Net.Http;
+using System.Text;
+using System.Net.Http.Headers;
 
 namespace Tuzobot
 {
@@ -21,7 +24,7 @@ namespace Tuzobot
             if (message.Type == "Message")
             {
                 AddConversationToDb(message);
-
+                Broadcast(message.Text);
                 return await Conversation.SendAsync(message, () => new MainDialog());
             }
             else
@@ -81,6 +84,35 @@ namespace Tuzobot
                 conv.LastActive = DateTime.UtcNow;
             }
             db.SaveChanges();
+        }
+
+        public async void Broadcast(string text)
+        {
+                var db = new TuzobotModelContainer();
+                foreach (var c in db.ConvSet)
+                {
+                    Task.Factory.StartNew(()=> SendMessage(c, text));
+                }
+        }
+
+        public async Task SendMessage(Conv c, string Text)
+        {
+            string appId = System.Configuration.ConfigurationManager.AppSettings["appId"];
+            string appSecret = System.Configuration.ConfigurationManager.AppSettings["appSecret"];
+            string url = "https://api.botframework.com/bot/v1.0/messages";
+            using (var client = new HttpClient())
+            {
+                var content = new StringContent(
+                $"{{\"conversationId\": \"{c.ConversationId}\",\"text\": \"{Text}\",\"from\": {{\"channelId\": \"{c.ChannelId}\",\"address\": \"{c.BotAddress}\"}},\"to\": {{\"channelId\": \"{c.ChannelId}\",\"address\": \"{c.UserAddress}\"}}}}",
+                Encoding.UTF8,
+                "application/json");
+                var byteArray = Encoding.ASCII.GetBytes($"{appId}:{appSecret}");
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", appSecret);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+            }
         }
     }
 }
