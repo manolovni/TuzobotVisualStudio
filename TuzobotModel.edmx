@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="TuzobotModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="TuzobotModelStoreContainer">
+    <EntitySet Name="ConvSet" EntityType="TuzobotModel.Store.ConvSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ContestSet" EntityType="TuzobotModel.Store.ContestSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="SubmitSet" EntityType="TuzobotModel.Store.SubmitSet" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="ConvSubmit" Association="TuzobotModel.Store.ConvSubmit">
+      <End Role="Conv" EntitySet="ConvSet" />
+      <End Role="Submit" EntitySet="SubmitSet" />
+    </AssociationSet>
+    <AssociationSet Name="SubmitContest" Association="TuzobotModel.Store.SubmitContest">
+      <End Role="Submit" EntitySet="SubmitSet" />
+      <End Role="Contest" EntitySet="ContestSet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="ConvSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ConversationId" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="UserAddress" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="BotAddress" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="ChannelId" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="LastActive" Type="datetime" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ContestSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Image" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="EndDate" Type="datetime" Nullable="false" />
+    <Property Name="Active" Type="bit" Nullable="false" />
+    <Property Name="NumberOfWinners" Type="int" Nullable="false" />
+    <Property Name="Type" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="SubmitSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Image" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="ConvId" Type="int" Nullable="false" />
+    <Property Name="ContestId" Type="int" Nullable="false" />
+    <Property Name="Score" Type="float" Nullable="true" />
+    <Property Name="IsNotAdult" Type="bit" Nullable="false" />
+    <Property Name="IsWinner" Type="bit" Nullable="false" />
+    <Property Name="Promoceode" Type="nvarchar(max)" Nullable="true" />
+  </EntityType>
+  <Association Name="ConvSubmit">
+    <End Role="Conv" Type="TuzobotModel.Store.ConvSet" Multiplicity="1" />
+    <End Role="Submit" Type="TuzobotModel.Store.SubmitSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Conv">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Submit">
+        <PropertyRef Name="ConvId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="SubmitContest">
+    <End Role="Submit" Type="TuzobotModel.Store.SubmitSet" Multiplicity="*" />
+    <End Role="Contest" Type="TuzobotModel.Store.ContestSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Contest">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Submit">
+        <PropertyRef Name="ContestId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="TuzobotModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="TuzobotModelContainer" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ConvSet" EntityType="TuzobotModel.Conv" />
+          <EntitySet Name="ContestSet" EntityType="TuzobotModel.Contest" />
+          <EntitySet Name="SubmitSet" EntityType="TuzobotModel.Submit" />
+          <AssociationSet Name="ConvSubmit" Association="TuzobotModel.ConvSubmit">
+            <End Role="Conv" EntitySet="ConvSet" />
+            <End Role="Submit" EntitySet="SubmitSet" />
+          </AssociationSet>
+          <AssociationSet Name="SubmitContest" Association="TuzobotModel.SubmitContest">
+            <End Role="Submit" EntitySet="SubmitSet" />
+            <End Role="Contest" EntitySet="ContestSet" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Conv">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ConversationId" Type="String" Nullable="false" />
+          <Property Name="UserAddress" Type="String" Nullable="false" />
+          <Property Name="BotAddress" Type="String" Nullable="false" />
+          <Property Name="ChannelId" Type="String" Nullable="false" />
+          <Property Name="LastActive" Type="DateTime" Nullable="false" />
+          <Property Name="Deleted" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Submits" Relationship="TuzobotModel.ConvSubmit" FromRole="Conv" ToRole="Submit" />
+        </EntityType>
+        <EntityType Name="Contest">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Description" Type="String" Nullable="false" />
+          <Property Name="Image" Type="String" Nullable="false" />
+          <Property Name="EndDate" Type="DateTime" Nullable="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Submits" Relationship="TuzobotModel.SubmitContest" FromRole="Contest" ToRole="Submit" />
+          <Property Name="NumberOfWinners" Type="Int32" Nullable="false" />
+          <Property Name="Type" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Submit">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Image" Type="String" Nullable="false" />
+          <NavigationProperty Name="Conv" Relationship="TuzobotModel.ConvSubmit" FromRole="Submit" ToRole="Conv" />
+          <Property Name="ConvId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Contest" Relationship="TuzobotModel.SubmitContest" FromRole="Submit" ToRole="Contest" />
+          <Property Name="ContestId" Type="Int32" Nullable="false" />
+          <Property Name="Score" Type="Double" Nullable="true" />
+          <Property Name="IsNotAdult" Type="Boolean" Nullable="false" />
+          <Property Name="IsWinner" Type="Boolean" Nullable="false" />
+          <Property Name="Promoceode" Type="String" Nullable="true" />
+        </EntityType>
+        <Association Name="ConvSubmit">
+          <End Type="TuzobotModel.Conv" Role="Conv" Multiplicity="1" />
+          <End Type="TuzobotModel.Submit" Role="Submit" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Conv">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Submit">
+              <PropertyRef Name="ConvId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="SubmitContest">
+          <End Type="TuzobotModel.Submit" Role="Submit" Multiplicity="*" />
+          <End Type="TuzobotModel.Contest" Role="Contest" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Submit">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="TuzobotModelStoreContainer" CdmEntityContainer="TuzobotModelContainer">
+    <EntitySetMapping Name="ConvSet">
+      <EntityTypeMapping TypeName="IsTypeOf(TuzobotModel.Conv)">
+        <MappingFragment StoreEntitySet="ConvSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="ConversationId" ColumnName="ConversationId" />
+          <ScalarProperty Name="UserAddress" ColumnName="UserAddress" />
+          <ScalarProperty Name="BotAddress" ColumnName="BotAddress" />
+          <ScalarProperty Name="ChannelId" ColumnName="ChannelId" />
+          <ScalarProperty Name="LastActive" ColumnName="LastActive" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ContestSet">
+      <EntityTypeMapping TypeName="IsTypeOf(TuzobotModel.Contest)">
+        <MappingFragment StoreEntitySet="ContestSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="Image" ColumnName="Image" />
+          <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+          <ScalarProperty Name="Active" ColumnName="Active" />
+          <ScalarProperty Name="NumberOfWinners" ColumnName="NumberOfWinners" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="SubmitSet">
+      <EntityTypeMapping TypeName="IsTypeOf(TuzobotModel.Submit)">
+        <MappingFragment StoreEntitySet="SubmitSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Image" ColumnName="Image" />
+          <ScalarProperty Name="ConvId" ColumnName="ConvId" />
+          <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+          <ScalarProperty Name="Score" ColumnName="Score" />
+          <ScalarProperty Name="IsNotAdult" ColumnName="IsNotAdult" />
+          <ScalarProperty Name="IsWinner" ColumnName="IsWinner" />
+          <ScalarProperty Name="Promoceode" ColumnName="Promoceode" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <DesignerProperty Name="UseLegacyProvider" Value="False" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
