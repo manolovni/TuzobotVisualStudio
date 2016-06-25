@@ -22,6 +22,7 @@ namespace Tuzobot
         public bool IsNotAdult { get; set; }
         public bool IsWinner { get; set; }
         public string Promoceode { get; set; }
+        public string UserName { get; set; }
     
         public virtual Conv Conv { get; set; }
         public virtual Contest Contest { get; set; }

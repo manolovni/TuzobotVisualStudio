@@ -1,2 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<parameters />
+<parameters>
+  <parameter name="TuzobotModelContainer-Web.config Connection String" description="TuzobotModelContainer Connection String used in web.config by the application to access the database." defaultValue="metadata=res://*/TuzobotModel.csdl|res://*/TuzobotModel.ssdl|res://*/TuzobotModel.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=rbot.database.windows.net;initial catalog=tuzodb;persist security info=True;user id=riftadmin;password=Liberpass42;MultipleActiveResultSets=True;App=EntityFramework&quot;" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\Nikolay\\Documents\\Visual\ Studio\ 2015\\Projects\\TuzobotGit\\Tuzobot\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='TuzobotModelContainer']/@connectionString" />
+  </parameter>
+</parameters>

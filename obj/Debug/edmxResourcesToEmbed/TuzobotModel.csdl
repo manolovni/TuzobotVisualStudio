@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="TuzobotModel" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+  <EntityContainer Name="TuzobotModelContainer" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="ConvSet" EntityType="TuzobotModel.Conv" />
+    <EntitySet Name="ContestSet" EntityType="TuzobotModel.Contest" />
+    <EntitySet Name="SubmitSet" EntityType="TuzobotModel.Submit" />
+    <AssociationSet Name="ConvSubmit" Association="TuzobotModel.ConvSubmit">
+      <End Role="Conv" EntitySet="ConvSet" />
+      <End Role="Submit" EntitySet="SubmitSet" />
+    </AssociationSet>
+    <AssociationSet Name="SubmitContest" Association="TuzobotModel.SubmitContest">
+      <End Role="Submit" EntitySet="SubmitSet" />
+      <End Role="Contest" EntitySet="ContestSet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="Conv">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ConversationId" Type="String" Nullable="false" />
+    <Property Name="UserAddress" Type="String" Nullable="false" />
+    <Property Name="BotAddress" Type="String" Nullable="false" />
+    <Property Name="ChannelId" Type="String" Nullable="false" />
+    <Property Name="LastActive" Type="DateTime" Nullable="false" />
+    <Property Name="Deleted" Type="Boolean" Nullable="false" />
+    <NavigationProperty Name="Submits" Relationship="TuzobotModel.ConvSubmit" FromRole="Conv" ToRole="Submit" />
+  </EntityType>
+  <EntityType Name="Contest">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Description" Type="String" Nullable="false" />
+    <Property Name="Image" Type="String" Nullable="false" />
+    <Property Name="EndDate" Type="DateTime" Nullable="false" />
+    <Property Name="Active" Type="Boolean" Nullable="false" />
+    <NavigationProperty Name="Submits" Relationship="TuzobotModel.SubmitContest" FromRole="Contest" ToRole="Submit" />
+    <Property Name="NumberOfWinners" Type="Int32" Nullable="false" />
+    <Property Name="Type" Type="Int32" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Submit">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Image" Type="String" Nullable="false" />
+    <NavigationProperty Name="Conv" Relationship="TuzobotModel.ConvSubmit" FromRole="Submit" ToRole="Conv" />
+    <Property Name="ConvId" Type="Int32" Nullable="false" />
+    <NavigationProperty Name="Contest" Relationship="TuzobotModel.SubmitContest" FromRole="Submit" ToRole="Contest" />
+    <Property Name="ContestId" Type="Int32" Nullable="false" />
+    <Property Name="Score" Type="Double" Nullable="true" />
+    <Property Name="IsNotAdult" Type="Boolean" Nullable="false" />
+    <Property Name="IsWinner" Type="Boolean" Nullable="false" />
+    <Property Name="Promoceode" Type="String" Nullable="true" />
+    <Property Name="UserName" Type="String" Nullable="false" />
+  </EntityType>
+  <Association Name="ConvSubmit">
+    <End Type="TuzobotModel.Conv" Role="Conv" Multiplicity="1" />
+    <End Type="TuzobotModel.Submit" Role="Submit" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Conv">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Submit">
+        <PropertyRef Name="ConvId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="SubmitContest">
+    <End Type="TuzobotModel.Submit" Role="Submit" Multiplicity="*" />
+    <End Type="TuzobotModel.Contest" Role="Contest" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Contest">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Submit">
+        <PropertyRef Name="ContestId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

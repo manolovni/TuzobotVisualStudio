@@ -75,3 +75,7 @@ C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\fr
 C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\ja\Microsoft.Bot.Builder.resources.dll
 C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\ru\Microsoft.Bot.Builder.resources.dll
 C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\zh-hans\Microsoft.Bot.Builder.resources.dll
+C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\EntityFramework.dll
+C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\EntityFramework.SqlServer.dll
+C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\EntityFramework.xml
+C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\bin\EntityFramework.SqlServer.xml

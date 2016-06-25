@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="TuzobotModel.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="TuzobotModelStoreContainer">
+    <EntitySet Name="ConvSet" EntityType="TuzobotModel.Store.ConvSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ContestSet" EntityType="TuzobotModel.Store.ContestSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="SubmitSet" EntityType="TuzobotModel.Store.SubmitSet" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="ConvSubmit" Association="TuzobotModel.Store.ConvSubmit">
+      <End Role="Conv" EntitySet="ConvSet" />
+      <End Role="Submit" EntitySet="SubmitSet" />
+    </AssociationSet>
+    <AssociationSet Name="SubmitContest" Association="TuzobotModel.Store.SubmitContest">
+      <End Role="Submit" EntitySet="SubmitSet" />
+      <End Role="Contest" EntitySet="ContestSet" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="ConvSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ConversationId" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="UserAddress" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="BotAddress" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="ChannelId" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="LastActive" Type="datetime" Nullable="false" />
+    <Property Name="Deleted" Type="bit" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ContestSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Description" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="Image" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="EndDate" Type="datetime" Nullable="false" />
+    <Property Name="Active" Type="bit" Nullable="false" />
+    <Property Name="NumberOfWinners" Type="int" Nullable="false" />
+    <Property Name="Type" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="SubmitSet">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Image" Type="nvarchar(max)" Nullable="false" />
+    <Property Name="ConvId" Type="int" Nullable="false" />
+    <Property Name="ContestId" Type="int" Nullable="false" />
+    <Property Name="Score" Type="float" Nullable="true" />
+    <Property Name="IsNotAdult" Type="bit" Nullable="false" />
+    <Property Name="IsWinner" Type="bit" Nullable="false" />
+    <Property Name="Promoceode" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="UserName" Type="nvarchar(max)" Nullable="false" />
+  </EntityType>
+  <Association Name="ConvSubmit">
+    <End Role="Conv" Type="TuzobotModel.Store.ConvSet" Multiplicity="1" />
+    <End Role="Submit" Type="TuzobotModel.Store.SubmitSet" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Conv">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Submit">
+        <PropertyRef Name="ConvId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="SubmitContest">
+    <End Role="Submit" Type="TuzobotModel.Store.SubmitSet" Multiplicity="*" />
+    <End Role="Contest" Type="TuzobotModel.Store.ContestSet" Multiplicity="1" />
+    <ReferentialConstraint>
+      <Principal Role="Contest">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Submit">
+        <PropertyRef Name="ContestId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

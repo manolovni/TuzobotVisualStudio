@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 06/25/2016 16:44:21
+-- Date Created: 06/25/2016 16:52:33
 -- Generated from EDMX file: C:\Users\Nikolay\Documents\Visual Studio 2015\Projects\TuzobotGit\Tuzobot\TuzobotModel.edmx
 -- --------------------------------------------------
 
@@ -17,11 +17,26 @@ GO
 -- Dropping existing FOREIGN KEY constraints
 -- --------------------------------------------------
 
+IF OBJECT_ID(N'[dbo].[FK_ConvSubmit]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[SubmitSet] DROP CONSTRAINT [FK_ConvSubmit];
+GO
+IF OBJECT_ID(N'[dbo].[FK_SubmitContest]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[SubmitSet] DROP CONSTRAINT [FK_SubmitContest];
+GO
 
 -- --------------------------------------------------
 -- Dropping existing tables
 -- --------------------------------------------------
 
+IF OBJECT_ID(N'[dbo].[ConvSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[ConvSet];
+GO
+IF OBJECT_ID(N'[dbo].[ContestSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[ContestSet];
+GO
+IF OBJECT_ID(N'[dbo].[SubmitSet]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[SubmitSet];
+GO
 
 -- --------------------------------------------------
 -- Creating all tables
@@ -60,7 +75,8 @@ CREATE TABLE [dbo].[SubmitSet] (
     [Score] float  NULL,
     [IsNotAdult] bit  NOT NULL,
     [IsWinner] bit  NOT NULL,
-    [Promoceode] nvarchar(max)  NULL
+    [Promoceode] nvarchar(max)  NULL,
+    [UserName] nvarchar(max)  NOT NULL
 );
 GO
 

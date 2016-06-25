@@ -54,6 +54,7 @@
     <Property Name="IsNotAdult" Type="bit" Nullable="false" />
     <Property Name="IsWinner" Type="bit" Nullable="false" />
     <Property Name="Promoceode" Type="nvarchar(max)" Nullable="true" />
+    <Property Name="UserName" Type="nvarchar(max)" Nullable="false" />
   </EntityType>
   <Association Name="ConvSubmit">
     <End Role="Conv" Type="TuzobotModel.Store.ConvSet" Multiplicity="1" />
@@ -136,6 +137,7 @@
           <Property Name="IsNotAdult" Type="Boolean" Nullable="false" />
           <Property Name="IsWinner" Type="Boolean" Nullable="false" />
           <Property Name="Promoceode" Type="String" Nullable="true" />
+          <Property Name="UserName" Type="String" Nullable="false" />
         </EntityType>
         <Association Name="ConvSubmit">
           <End Type="TuzobotModel.Conv" Role="Conv" Multiplicity="1" />
@@ -204,6 +206,7 @@
           <ScalarProperty Name="IsNotAdult" ColumnName="IsNotAdult" />
           <ScalarProperty Name="IsWinner" ColumnName="IsWinner" />
           <ScalarProperty Name="Promoceode" ColumnName="Promoceode" />
+          <ScalarProperty Name="UserName" ColumnName="UserName" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

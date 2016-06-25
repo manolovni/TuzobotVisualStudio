@@ -49,7 +49,7 @@ namespace Tuzobot
             }
             else
             {
-                await context.PostAsync(string.Format("{0}: You said {1}", this.count++, message.Text));
+                await context.PostAsync("Я умею распознавать эмоции на фотографиях, пришли мне слефи 😘");
                 context.Wait(MessageReceivedAsync);
             }
         }

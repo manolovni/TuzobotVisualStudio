@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="TuzobotModelStoreContainer" CdmEntityContainer="TuzobotModelContainer">
+    <EntitySetMapping Name="ConvSet">
+      <EntityTypeMapping TypeName="IsTypeOf(TuzobotModel.Conv)">
+        <MappingFragment StoreEntitySet="ConvSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="ConversationId" ColumnName="ConversationId" />
+          <ScalarProperty Name="UserAddress" ColumnName="UserAddress" />
+          <ScalarProperty Name="BotAddress" ColumnName="BotAddress" />
+          <ScalarProperty Name="ChannelId" ColumnName="ChannelId" />
+          <ScalarProperty Name="LastActive" ColumnName="LastActive" />
+          <ScalarProperty Name="Deleted" ColumnName="Deleted" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ContestSet">
+      <EntityTypeMapping TypeName="IsTypeOf(TuzobotModel.Contest)">
+        <MappingFragment StoreEntitySet="ContestSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="Image" ColumnName="Image" />
+          <ScalarProperty Name="EndDate" ColumnName="EndDate" />
+          <ScalarProperty Name="Active" ColumnName="Active" />
+          <ScalarProperty Name="NumberOfWinners" ColumnName="NumberOfWinners" />
+          <ScalarProperty Name="Type" ColumnName="Type" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="SubmitSet">
+      <EntityTypeMapping TypeName="IsTypeOf(TuzobotModel.Submit)">
+        <MappingFragment StoreEntitySet="SubmitSet">
+          <ScalarProperty Name="Id" ColumnName="Id" />
+          <ScalarProperty Name="Image" ColumnName="Image" />
+          <ScalarProperty Name="ConvId" ColumnName="ConvId" />
+          <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+          <ScalarProperty Name="Score" ColumnName="Score" />
+          <ScalarProperty Name="IsNotAdult" ColumnName="IsNotAdult" />
+          <ScalarProperty Name="IsWinner" ColumnName="IsWinner" />
+          <ScalarProperty Name="Promoceode" ColumnName="Promoceode" />
+          <ScalarProperty Name="UserName" ColumnName="UserName" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

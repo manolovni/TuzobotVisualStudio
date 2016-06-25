@@ -2,6 +2,8 @@
 using System.Web.Http;
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Dialogs;
+using System.Linq;
+using System;
 
 namespace Tuzobot
 {
@@ -14,10 +16,11 @@ namespace Tuzobot
         /// </summary>
         public async Task<Message> Post([FromBody]Message message)
         {
+            
+
             if (message.Type == "Message")
             {
-                
-
+                AddConversationToDb(message);
 
                 return await Conversation.SendAsync(message, () => new MainDialog());
             }
@@ -57,6 +60,27 @@ namespace Tuzobot
             }
 
             return null;
+        }
+
+        private void AddConversationToDb(Message message)
+        {
+            var db = new TuzobotModelContainer();
+            var conv = db.ConvSet.SingleOrDefault(c=>c.ConversationId == message.ConversationId);
+            if(conv==null)
+            {
+                Conv newConversation = new Conv();
+                newConversation.ConversationId = message.ConversationId;
+                newConversation.UserAddress = message.From.Address;
+                newConversation.BotAddress = message.To.Address;
+                newConversation.LastActive = DateTime.UtcNow;
+                newConversation.ChannelId = message.From.ChannelId;
+                db.ConvSet.Add(newConversation);
+            }
+            else
+            {
+                conv.LastActive = DateTime.UtcNow;
+            }
+            db.SaveChanges();
         }
     }
 }
