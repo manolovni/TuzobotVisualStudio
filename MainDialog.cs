@@ -168,7 +168,16 @@ namespace Tuzobot
                         var happyDelta = ((double)emotions[0].Scores.Happiness - 0.5);
                         var surpriseDelta = ((double)emotions[0].Scores.Surprise - 0.5);
                         Contest contest = db.ContestSet.SingleOrDefault(c => c.Active);
-                        if (contest == null) contest = db.ContestSet.SingleOrDefault(c => c.Id == 2);
+
+                        if (contest == null)
+                        {
+                            contest = db.ContestSet.SingleOrDefault(c => c.Id == 2);
+                        }
+                        else
+                        {
+                            await context.PostAsync($"Твоя фотография принята на конкурс, но можно сделать еще лучше 🌟🌟🌟🌟");
+                        }
+
                         Conv conv = db.ConvSet.SingleOrDefault(c => c.ConversationId == message.ConversationId);
                         var newSubmit = new Submit();
                         newSubmit.UserName = message.From.Name;
@@ -184,6 +193,8 @@ namespace Tuzobot
                         await context.PostAsync($"Счастье {(100*emotions[0].Scores.Happiness).ToString("N2")}%");
                         await context.PostAsync($"Удивление {(100 * emotions[0].Scores.Surprise).ToString("N2")}%");
                         await context.PostAsync($"Испуг {(100 * emotions[0].Scores.Fear).ToString("N2")}%");
+
+)
                     }
                     else
                     {
@@ -216,6 +227,15 @@ namespace Tuzobot
                 //    });
                 await context.PostAsync($"![{w.UserName}]({w.Image})");
                 }
+
+                PromptDialog.Confirm(
+                    context,
+                    Finish,
+                    $"Завершаем конкурс?",
+                    "Не понимаю, завершаем или нет?",
+                    promptStyle: PromptStyle.None);
+
+                return;
 
             }
             else
@@ -336,6 +356,54 @@ namespace Tuzobot
             con = false;
             context.Wait(MessageReceivedAsync);
         }
+
+        public async Task Finish(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+
+                var reply = context.MakeMessage();
+                reply.Text = "🔥🔥🔥\n\nУра!\n\nКонкурс завершен, промокоды отправлены победителям!";
+                await context.PostAsync(reply);
+
+                var db = new TuzobotModelContainer();
+                var winners = db.SubmitSet.Where(s => s.Contest.Active).OrderBy(s => s.Score).Take(3);
+                var m = context.MakeMessage();
+                //m.Attachments = new List<Attachment>();
+                await context.PostAsync($"\n\nПобедители!");
+                foreach (var w in winners)
+                {
+                    var promo = CreatePassword(6);
+
+                    w.IsWinner = true;
+                    w.Promoceode = promo;
+                    await context.PostAsync($"{w.UserName} - {promo}");
+                }
+                var lastWinners = db.SubmitSet.Where(s => s.IsWinner && s.Contest.Active);
+                var cont = db.ContestSet.SingleOrDefault(c => c.Active);
+                cont.Active = false;
+                db.SaveChanges();
+
+                foreach(var w in lastWinners)
+                {
+                    SendMessage(w.Conv,$"Поздравляем!\n\nВы победили в конкурсе!\n\nВаш промокод: {w.Promoceode}")
+                }
+
+
+            }
+            else
+            {
+                var reply = context.MakeMessage();
+                reply.Text = "Ок, тогда что-нибудь еще придумаем.";
+                reply.Attachments = AdminMenu();
+
+                await context.PostAsync(reply);
+            }
+            con = false;
+            context.Wait(MessageReceivedAsync);
+        }
+
         private List<Attachment> DateSelect()
         {
             var result = new List<Attachment>();
@@ -408,6 +476,18 @@ namespace Tuzobot
             }
             con = false;
             context.Wait(MessageReceivedAsync);
+        }
+
+        public string CreatePassword(int length)
+        {
+            const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            StringBuilder res = new StringBuilder();
+            Random rnd = new Random();
+            while (0 < length--)
+            {
+                res.Append(valid[rnd.Next(valid.Length)]);
+            }
+            return res.ToString();
         }
 
     }
