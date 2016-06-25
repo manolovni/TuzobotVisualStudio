@@ -6,6 +6,8 @@ using System.Net.Http;
 using Microsoft.ProjectOxford.Emotion.Contract;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
+using System.Net.Http.Headers;
 
 namespace Tuzobot
 {
@@ -17,7 +19,9 @@ namespace Tuzobot
         bool an = false;
         bool admin = false;
         bool loginFlag = true;
-
+        bool conStart = false;
+        string broadcastText = "";
+        DateTime contestEndDate = DateTime.Now;
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -26,6 +30,29 @@ namespace Tuzobot
         {
             
             var message = await argument;
+
+            if (admin && conStart)
+            {
+                if (DateTime.TryParse(message.Text, out contestEndDate))
+                {
+                    PromptDialog.Confirm(
+                        context,
+                        ContestStartFinal,
+                        $"Запускаем конкурс:\n\n{ broadcastText}\n\n Завершение:{contestEndDate.ToString()} \n\nВсе правильно?",
+                        "Не понимаю, отправим всем или нет?",
+                        promptStyle: PromptStyle.None);
+                }
+                else
+                {
+                    var reply = context.MakeMessage();
+                    reply.Text = "Извини, не понимаю 😏\n\n Когда закончится конкурс?";
+                    reply.Attachments = DateSelect();
+
+                    await context.PostAsync(reply);
+                }
+                return;
+            }
+
 
             if (message.Text.Contains("выход"))
             {
@@ -37,6 +64,30 @@ namespace Tuzobot
                 return;
             }
 
+            if (con)
+            {
+                broadcastText = message.Text;
+                PromptDialog.Confirm(
+                    context,
+                    ContestStart,
+                    $"Ты хочешь отправить всем такое описание конкурса:\n\n{ message.Text}\n\n Правильно?",
+                    "Не понимаю, отправим всем или нет?",
+                    promptStyle: PromptStyle.None);
+                return;
+            }
+
+            if (an)
+            {
+                    broadcastText = message.Text;
+                    PromptDialog.Confirm(
+                        context,
+                        BroadcastAsync,
+                        $"Ты хочешь отправить всем:\n\n{ message.Text}\n\n Правильно?",
+                        "Не понимаю, отправим всем или нет?",
+                        promptStyle: PromptStyle.None);
+                    return;
+            }
+
             if (menu)
             {
                 if (message.Text == "res")
@@ -46,7 +97,8 @@ namespace Tuzobot
 
                     int userCount = db.ConvSet.Count();
                     int contestCount = db.ContestSet.Where(c => c.Active).Count();
-                    await context.PostAsync($"Оперативная сводка:\n\n Активных переписок в рассылке - {userCount}\n\nАктивных конкурсов - {contestCount}");
+                    int activeSubmissions = db.SubmitSet.Count(s => s.Contest.Active);
+                    await context.PostAsync($"Оперативная сводка:\n\n Активных переписок в рассылке - {userCount}\n\nАктивных конкурсов - {contestCount}\n\nЗаявок на текущий конкурс - {activeSubmissions}");
                     context.Wait(MessageReceivedAsync);
                 }
 
@@ -95,13 +147,13 @@ namespace Tuzobot
 
             if (message.Text.Contains("Я админ"))
             {
-                if (message.ConversationId == "COGGhF5OhEapApPG9ZDdlCYgBKf2RBAmu96o9cP6Tj5tb4Gv")
-                {
+                //if (message.ConversationId == "COGGhF5OhEapApPG9ZDdlCYgBKf2RBAmu96o9cP6Tj5tb4Gv")
+                //{
                     loginFlag = true;
                     await context.PostAsync("Чем докажешь?");
                     context.Wait(MessageReceivedAsync);
                     return;
-                }
+                //}
             }
 
             if (message.Attachments.Count > 0)
@@ -140,33 +192,9 @@ namespace Tuzobot
                 }
             }
 
-            if (message.Text == "reset")
-            {
-                PromptDialog.Confirm(
-                    context,
-                    AfterResetAsync,
-                    "Are you sure you want to reset the count?",
-                    "Didn't get that!",
-                    promptStyle: PromptStyle.None);
-            }
-            else
-            {
+
                 await context.PostAsync("Я умею распознавать эмоции на фотографиях, пришли мне слефи 😘");
                 context.Wait(MessageReceivedAsync);
-            }
-        }
-        public async Task AfterResetAsync(IDialogContext context, IAwaitable<bool> argument)
-        {
-            var confirm = await argument;
-            if (confirm)
-            {
-                await context.PostAsync("Reset count.");
-            }
-            else
-            {
-                await context.PostAsync("Did not reset count.");
-            }
-            context.Wait(MessageReceivedAsync);
         }
 
         public async Task EndContestBeforeDue(IDialogContext context, IAwaitable<bool> argument)
@@ -175,11 +203,29 @@ namespace Tuzobot
             if (confirm)
             {
                 await context.PostAsync("Конкурс завершен, подтвердите результаты перед отправкой промокодов.");
+
             }
             else
             {
                 await context.PostAsync("Конкурс продолжается!");
             }
+            context.Wait(MessageReceivedAsync);
+        }
+
+        public async Task BroadcastAsync(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+                
+                Broadcast(broadcastText);
+                await context.PostAsync("🌟🌟🌟🌟\n\nАнонс отправляется!");
+            }
+            else
+            {
+                await context.PostAsync("Придумаем еще что-нибудь.");
+            }
+            an = false;
             context.Wait(MessageReceivedAsync);
         }
 
@@ -223,5 +269,133 @@ namespace Tuzobot
             menu = true;
             return result;
         }
+
+        public async void Broadcast(string text)
+        {
+            var db = new TuzobotModelContainer();
+            foreach (var c in db.ConvSet)
+            {
+                Task.Factory.StartNew(() => SendMessage(c, text));
+            }
+        }
+
+        public async Task SendMessage(Conv c, string Text)
+        {
+            string appId = System.Configuration.ConfigurationManager.AppSettings["appId"];
+            string appSecret = System.Configuration.ConfigurationManager.AppSettings["appSecret"];
+            string url = "https://api.botframework.com/bot/v1.0/messages";
+            using (var client = new HttpClient())
+            {
+                var content = new StringContent(
+                $"{{\"conversationId\": \"{c.ConversationId}\",\"text\": \"{Text}\",\"from\": {{\"channelId\": \"{c.ChannelId}\",\"address\": \"{c.BotAddress}\"}},\"to\": {{\"channelId\": \"{c.ChannelId}\",\"address\": \"{c.UserAddress}\"}}}}",
+                Encoding.UTF8,
+                "application/json");
+                var byteArray = Encoding.ASCII.GetBytes($"{appId}:{appSecret}");
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", appSecret);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                var response = await client.PostAsync(url, content);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+            }
+        }
+
+        public async Task ContestStart(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+                conStart = true;
+
+                var reply = context.MakeMessage();
+                reply.Text = "🔥🔥🔥\n\nАнонс готов!\n\nКогда закончится конкурс?";
+                reply.Attachments = DateSelect();
+
+                await context.PostAsync(reply);
+            }
+            else
+            {
+                var reply = context.MakeMessage();
+                reply.Text = "Ок, тогда что-нибудь еще придумаем.";
+                reply.Attachments = AdminMenu();
+
+                await context.PostAsync(reply);
+            }
+            con = false;
+            context.Wait(MessageReceivedAsync);
+        }
+        private List<Attachment> DateSelect()
+        {
+            var result = new List<Attachment>();
+            var actions = new List<Microsoft.Bot.Connector.Action>();
+            actions.Add(new Microsoft.Bot.Connector.Action
+            {
+                Title = $"Через два часа",
+                Message = DateTime.Now.AddHours(2).ToString()
+            });
+            actions.Add(new Microsoft.Bot.Connector.Action
+            {
+                Title = $"Сегодня 12:00",
+                Message = DateTime.Today.AddHours(12).ToString()
+            });
+            actions.Add(new Microsoft.Bot.Connector.Action
+            {
+                Title = $"Завтра 12:00",
+                Message = DateTime.Today.AddDays(1).AddHours(12).ToString()
+            });
+            result.Add(new Attachment
+            {
+                Actions = actions
+            });
+            return result;
+        }
+
+        public async Task ContestStartFinal(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+
+                var db = new TuzobotModelContainer();
+                var contests = db.ContestSet.Where(c => c.Active).SingleOrDefault();
+                if (contests == null)
+                {
+                    Contest c = new Contest();
+                    c.Active = true;
+                    c.EndDate = contestEndDate;
+                    c.Description = broadcastText;
+                    c.NumberOfWinners = 3;
+                    c.Type = 1;
+                    c.Image = "";
+                    
+                    db.ContestSet.Add(c);
+                    db.SaveChanges();
+                    var reply = context.MakeMessage();
+                    reply.Text = "🔥🔥🔥\n\nКонкурс начинается!\n\nРассылка пошла, как закончу - отпишусь.";
+
+                    await context.PostAsync(reply);
+                    foreach (var con in db.ConvSet)
+                    {
+                        SendMessage(con, $"{ broadcastText}\n\nПодача заявок до {contestEndDate}");
+                    }
+                }
+                else
+                {
+                    var reply = context.MakeMessage();
+                    reply.Text = "В сситеме уже идет конкурс";
+                    await context.PostAsync(reply);
+                }
+            }
+            else
+            {
+                var reply = context.MakeMessage();
+                reply.Text = "Ок, тогда что-нибудь еще придумаем.";
+                reply.Attachments = AdminMenu();
+
+                await context.PostAsync(reply);
+            }
+            con = false;
+            context.Wait(MessageReceivedAsync);
+        }
+
     }
 }
