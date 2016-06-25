@@ -203,6 +203,19 @@ namespace Tuzobot
             if (confirm)
             {
                 await context.PostAsync("Конкурс завершен, подтвердите результаты перед отправкой промокодов.");
+                var db = new TuzobotModelContainer();
+                var winners = db.SubmitSet.Where(s => s.Contest.Active).OrderBy(s=>s.Score).Take(3);
+                var m = context.MakeMessage();
+                //m.Attachments = new List<Attachment>();
+                foreach(var w in winners)
+                {
+                //    m.Attachments.Add(new Attachment()
+                //    {
+                //        ContentUrl = w.Image,
+                //        ContentType = "image/png"
+                //    });
+                await context.PostAsync($"![{w.UserName}]({w.Image})");
+                }
 
             }
             else
