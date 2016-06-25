@@ -24,7 +24,7 @@ namespace Tuzobot
             if (message.Type == "Message")
             {
                 AddConversationToDb(message);
-                Broadcast(message.Text);
+                //Broadcast(message.Text);
                 return await Conversation.SendAsync(message, () => new MainDialog());
             }
             else

@@ -4,22 +4,14 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Connector;
 using System.Net.Http;
 using Microsoft.ProjectOxford.Emotion.Contract;
-using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.Bot.Connector;
-using Microsoft.Bot.Builder.Dialogs;
 using System.Linq;
-using System;
-using System.Net.Http;
-using System.Text;
-using System.Net.Http.Headers;
 
 namespace Tuzobot
 {
     [Serializable]
     public class MainDialog : IDialog<object>
     {
-        TuzobotModelContainer db = new TuzobotModelContainer();
+        
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -32,6 +24,7 @@ namespace Tuzobot
             if (message.Attachments.Count > 0)
             {
                 CV cv = new CV();
+                TuzobotModelContainer db = new TuzobotModelContainer();
                 foreach (var a in message.Attachments)
                 {
                     Emotion[] emotions = await cv.Detect(a.ContentUrl);
@@ -39,9 +32,9 @@ namespace Tuzobot
                     {
                         var happyDelta = ((double)emotions[0].Scores.Happiness - 0.5);
                         var surpriseDelta = ((double)emotions[0].Scores.Surprise - 0.5);
-                        Contest contest = db.ContestSet.SingleOrDefault(c=>c.Active);
+                        Contest contest = db.ContestSet.SingleOrDefault(c => c.Active);
                         if (contest == null) contest = db.ContestSet.SingleOrDefault(c => c.Id == 2);
-                        Conv conv = db.ConvSet.SingleOrDefault(c=>c.ConversationId == message.ConversationId);
+                        Conv conv = db.ConvSet.SingleOrDefault(c => c.ConversationId == message.ConversationId);
                         var newSubmit = new Submit();
                         newSubmit.UserName = message.From.Name;
                         newSubmit.IsNotAdult = true;
@@ -49,7 +42,7 @@ namespace Tuzobot
                         newSubmit.Conv = conv;
                         newSubmit.Image = message.Attachments[0].ContentUrl;
                         newSubmit.Contest = contest;
-                        newSubmit.Score = happyDelta * happyDelta + surpriseDelta * surpriseDelta; 
+                        newSubmit.Score = happyDelta * happyDelta + surpriseDelta * surpriseDelta;
                         db.SubmitSet.Add(newSubmit);
                         db.SaveChanges();
 
@@ -84,7 +77,6 @@ namespace Tuzobot
             var confirm = await argument;
             if (confirm)
             {
-                this.count = 1;
                 await context.PostAsync("Reset count.");
             }
             else
