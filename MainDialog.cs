@@ -27,9 +27,13 @@ namespace Tuzobot
                     Emotion[] emotions = await cv.Detect(a.ContentUrl);
                     if (emotions != null && emotions.Length > 0)
                     {
-                        await context.PostAsync($"Счастье {100*emotions[0].Scores.Happiness}%");
-                        await context.PostAsync($"Удивление {100 * emotions[0].Scores.Surprise}%");
-                        await context.PostAsync($"Испуг {100 * emotions[0].Scores.Fear}%");
+                        await context.PostAsync($"Счастье {(100*emotions[0].Scores.Happiness).ToString("N2")}%");
+                        await context.PostAsync($"Удивление {(100 * emotions[0].Scores.Surprise).ToString("N2")}%");
+                        await context.PostAsync($"Испуг {(100 * emotions[0].Scores.Fear).ToString("N2")}%");
+                    }
+                    else
+                    {
+                        await context.PostAsync($"К сожаленю, не смог распознать эмоцию, попробуй еще 😊");
                     }
                 }
             }
