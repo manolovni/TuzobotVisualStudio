@@ -5,13 +5,19 @@ using Microsoft.Bot.Connector;
 using System.Net.Http;
 using Microsoft.ProjectOxford.Emotion.Contract;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Tuzobot
 {
     [Serializable]
     public class MainDialog : IDialog<object>
     {
-        
+        bool menu = false;
+        bool con = false;
+        bool an = false;
+        bool admin = false;
+        bool loginFlag = true;
+
         public async Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -20,6 +26,83 @@ namespace Tuzobot
         {
             
             var message = await argument;
+
+            if (message.Text.Contains("выход"))
+            {
+                loginFlag = false;
+                menu = false;
+                admin = false;
+                await context.PostAsync("До скорого!");
+                context.Wait(MessageReceivedAsync);
+                return;
+            }
+
+            if (menu)
+            {
+                if (message.Text == "res")
+                {
+                    con = true;
+                    var db = new TuzobotModelContainer();
+
+                    int userCount = db.ConvSet.Count();
+                    int contestCount = db.ContestSet.Where(c => c.Active).Count();
+                    await context.PostAsync($"Оперативная сводка:\n\n Активных переписок в рассылке - {userCount}\n\nАктивных конкурсов - {contestCount}");
+                    context.Wait(MessageReceivedAsync);
+                }
+
+                if (message.Text == "an")
+                {
+                    an = true;
+                    await context.PostAsync("Точно, давай сделаем анонс, что напишем?");
+                    context.Wait(MessageReceivedAsync);
+                }
+
+                if (message.Text == "con")
+                {
+                    con = true;
+                    await context.PostAsync("Супер, новый конкурс!\n\nОпиши его для ребят, не забудь про призы, это очень важно 😊");
+                    context.Wait(MessageReceivedAsync);
+                }
+
+                if (message.Text == "end")
+                {
+                    PromptDialog.Confirm(
+                        context,
+                        EndContestBeforeDue,
+                        $"Завершаем конкурс досрочно?",
+                        "Не понимаю, завершаем или нет?",
+                        promptStyle: PromptStyle.None);
+                    return;
+                }
+
+                menu = false;
+                return;
+            }
+
+            if (message.Text == "123" && loginFlag)
+            {
+                //adminConvId = message.ConversationId;
+                admin = true;
+                menu = true;
+                var reply = context.MakeMessage();
+                reply.Text = "Добро пожаловать, хозяин!\n\nЧего изволите?";
+                reply.Attachments = AdminMenu();
+
+                await context.PostAsync(reply);
+                context.Wait(MessageReceivedAsync);
+                return;
+            }
+
+            if (message.Text.Contains("Я админ"))
+            {
+                if (message.ConversationId == "COGGhF5OhEapApPG9ZDdlCYgBKf2RBAmu96o9cP6Tj5tb4Gv")
+                {
+                    loginFlag = true;
+                    await context.PostAsync("Чем докажешь?");
+                    context.Wait(MessageReceivedAsync);
+                    return;
+                }
+            }
 
             if (message.Attachments.Count > 0)
             {
@@ -84,6 +167,61 @@ namespace Tuzobot
                 await context.PostAsync("Did not reset count.");
             }
             context.Wait(MessageReceivedAsync);
+        }
+
+        public async Task EndContestBeforeDue(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+                await context.PostAsync("Конкурс завершен, подтвердите результаты перед отправкой промокодов.");
+            }
+            else
+            {
+                await context.PostAsync("Конкурс продолжается!");
+            }
+            context.Wait(MessageReceivedAsync);
+        }
+
+        private List<Attachment> AdminMenu()
+        {
+            var result = new List<Attachment>();
+            var actions = new List<Microsoft.Bot.Connector.Action>();
+            actions.Add(new Microsoft.Bot.Connector.Action
+            {
+                Title = $"Результаты",
+                Message = $"res"
+            });
+            actions.Add(new Microsoft.Bot.Connector.Action
+            {
+                Title = $"Анонс",
+                Message = $"an"
+            });
+
+            var db = new TuzobotModelContainer();
+            var contest = db.ContestSet.Where(c => c.Active).SingleOrDefault();
+            if (contest == null)
+            {
+                actions.Add(new Microsoft.Bot.Connector.Action
+                {
+                    Title = $"Конкурс",
+                    Message = $"con"
+                });
+            }
+            else
+            {
+                actions.Add(new Microsoft.Bot.Connector.Action
+                {
+                    Title = $"Завершить конкурс",
+                    Message = $"end"
+                });
+            }
+            result.Add(new Attachment
+            {
+                Actions = actions
+            });
+            menu = true;
+            return result;
         }
     }
 }
